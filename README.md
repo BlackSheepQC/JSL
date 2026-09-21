@@ -78,6 +78,7 @@ Playwright et son navigateur Chromium doivent être disponibles dans cet environ
 - `JSlistenerDB_reader.py` : lecture et synthèse d'une base SQLite.
 - `secret_scan.py` : recherche heuristique de secrets et d'artefacts sensibles.
 - `SECURITY.md` : politique de sécurité, risques et protections.
+- `CHEAT_SHEET.md` : options, combinaisons et résultats attendus.
 - `install_cli.sh` : installe les commandes globales dans `~/.local/bin`.
 - `setup_env.sh` : construit l'environnement `.venv` et installe Chromium.
 - `test_js_listener.sh` : test d'intégration local.
