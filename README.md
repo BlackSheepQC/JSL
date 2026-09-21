@@ -10,11 +10,57 @@ Utiliser cet outil uniquement sur des domaines explicitement autorisés.
 
 ## 2. Prérequis
 
-Le dossier contient un environnement Python virtuel dans `.venv/`.
+Prévoir :
+
+- Python 3.9 ou plus récent ;
+- `venv` disponible dans l'installation Python ;
+- une connexion Internet pendant l'installation de Playwright et Chromium ;
+- un environnement graphique si le navigateur n'est pas lancé avec `--headless`.
+
+Les dépendances Python sont listées dans [requirements.txt](requirements.txt). Le dossier `.venv/` est local et n'est pas versionné.
+
+### Installation automatique
+
+Après avoir cloné le dépôt :
+
+```bash
+cd JSL
+chmod +x setup_env.sh
+./setup_env.sh
+```
+
+Le script :
+
+1. crée `.venv/` s'il n'existe pas ;
+2. installe les dépendances de `requirements.txt` ;
+3. installe le navigateur Chromium utilisé par Playwright ;
+4. installe les commandes globales dans `~/.local/bin` ;
+5. vérifie que les commandes principales répondent.
+
+Si Python n'est pas nommé `python3`, préciser son chemin :
+
+```bash
+PYTHON_BIN=/usr/bin/python3 ./setup_env.sh
+```
+
+Si `~/.local/bin` n'est pas dans le `PATH` :
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+### Installation manuelle
+
+La même installation peut être effectuée ainsi :
 
 Depuis le dossier `JSL` :
 
 ```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m playwright install chromium
+./install_cli.sh
 source .venv/bin/activate
 ```
 
@@ -33,6 +79,7 @@ Playwright et son navigateur Chromium doivent être disponibles dans cet environ
 - `secret_scan.py` : recherche heuristique de secrets et d'artefacts sensibles.
 - `SECURITY.md` : politique de sécurité, risques et protections.
 - `install_cli.sh` : installe les commandes globales dans `~/.local/bin`.
+- `setup_env.sh` : construit l'environnement `.venv` et installe Chromium.
 - `test_js_listener.sh` : test d'intégration local.
 - `.venv/` : environnement Python utilisé pour exécuter Playwright.
 
