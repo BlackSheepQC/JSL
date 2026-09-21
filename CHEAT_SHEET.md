@@ -1,8 +1,8 @@
-# Cheat Sheet - JS Listener
+# Aide-mémoire — JS Listener
 
-Guide rapide des options, syntaxes, combinaisons et résultats attendus.
+Guide rapide des options, des syntaxes, des combinaisons et des résultats attendus.
 
-> Utiliser JSL uniquement sur des systèmes et domaines explicitement autorisés. Un fichier `--in-scope` ne remplace pas l'autorisation du propriétaire.
+> Utiliser JSL uniquement sur des systèmes et des domaines explicitement autorisés. Un fichier `--in-scope` ne remplace pas l'autorisation du propriétaire.
 
 ## 1. Commandes disponibles
 
@@ -12,7 +12,7 @@ Après `./setup_env.sh`, les commandes globales utilisent automatiquement `.venv
 |---|---|
 | `js-listener` | Lance le listener Playwright. |
 | `jslistener-db-reader` | Lit une base SQLite et produit un rapport. |
-| `jslistener-secret-scan` | Recherche des secrets et artefacts sensibles. |
+| `jslistener-secret-scan` | Recherche des secrets et des artefacts sensibles. |
 | `jslistener-test` | Lance le test d'intégration. |
 
 Aide de chaque commande :
@@ -36,7 +36,7 @@ Résultat attendu :
 - navigateur Chromium visible ;
 - mode initial `ctv` ;
 - base `/tmp/js_listener.sqlite3` ;
-- observation des requêtes autorisées `fetch`/`XHR` ;
+- observation des requêtes `fetch`/`XHR` autorisées ;
 - arrêt automatique après 180 secondes d'inactivité.
 
 ### Lecteur SQLite
@@ -45,7 +45,7 @@ Résultat attendu :
 jslistener-db-reader --db /tmp/js_listener.sqlite3
 ```
 
-Résultat attendu : rapport texte des sessions, ressources, événements réseau, cookies et domaines.
+Résultat attendu : rapport texte des sessions, des ressources, des événements réseau, des cookies et des domaines.
 
 ### Scanner
 
@@ -53,7 +53,7 @@ Résultat attendu : rapport texte des sessions, ressources, événements réseau
 jslistener-secret-scan --history
 ```
 
-Résultat attendu : rapport JSON dans le terminal. Le code de sortie est `0` sans finding critique ou élevé, `1` si un finding critique ou élevé est détecté.
+Résultat attendu : rapport JSON dans le terminal. Le code de sortie est `0` si aucun résultat critique ou élevé n'est détecté, et `1` dans le cas contraire.
 
 ## 3. Modes de collecte
 
@@ -66,7 +66,7 @@ js-listener \
   --in-scope ./in-scope.txt
 ```
 
-Collecte principalement les requêtes `fetch` et `XHR` : méthode, URL, statut, MIME, taille, redirection et erreur réseau.
+Collecte principalement les requêtes `fetch` et `XHR` : méthode, URL, statut, type MIME, taille, redirection et erreur réseau.
 
 Résultat dans SQLite : table `network_events`.
 
@@ -79,7 +79,7 @@ js-listener \
   --in-scope ./in-scope.txt
 ```
 
-Collecte les ressources JavaScript, MJS et JSON, leur statut, MIME, taille, hash et dépendance avec la page.
+Collecte les ressources JavaScript, MJS et JSON, ainsi que leur statut, leur type MIME, leur taille, leur empreinte (hash) et leur dépendance avec la page.
 
 Résultat dans SQLite : tables `resources` et `dependencies`, journal optionnel `--js-log`.
 
@@ -91,7 +91,7 @@ kill -USR1 <PID>
 
 `ctv` devient `ctg`, puis `ctg` devient `ctv`. Chaque transition est écrite dans `mode_changes` et `events`.
 
-Une nouvelle navigation ou interaction est nécessaire après le changement pour observer les nouvelles données dans le mode actif.
+Une nouvelle navigation ou une nouvelle interaction est nécessaire après le changement pour observer les nouvelles données dans le mode actif.
 
 ## 4. Options générales
 
@@ -100,7 +100,7 @@ Une nouvelle navigation ou interaction est nécessaire après le changement pour
 | Cible | `--target URL` ou `-t URL` | Définit l'URL initiale. Obligatoire. |
 | User-Agent | `--user-agent "VALEUR"` ou `-u "VALEUR"` | Utilise le User-Agent choisi. |
 | Mode | `--mode ctv` ou `--mode ctg` | Définit le mode initial. Défaut : `ctv`. |
-| Périmètre | `--in-scope ./in-scope.txt` | N'enregistre que les URLs correspondant au fichier. |
+| Périmètre | `--in-scope ./in-scope.txt` | N'enregistre que les URL correspondant aux motifs du fichier. |
 | Base | `--db /chemin/session.sqlite3` | Change la base SQLite. Les fichiers SQLite sont protégés en `600`. |
 | Pause | `--sleep 2` | Vérifie l'état toutes les 2 secondes. |
 | Inactivité | `--inactivity 60` | Arrêt après 60 secondes sans activité. |
@@ -122,7 +122,7 @@ js-listener \
 
 ## 5. Cookies : combinaisons
 
-### Aucune capture de cookie, recommandé par défaut
+### Aucune capture de cookie (recommandé par défaut)
 
 ```bash
 js-listener -t https://example.com --in-scope ./in-scope.txt
@@ -140,7 +140,7 @@ js-listener \
   --cookie-log /tmp/client-cookie-log.jsonl
 ```
 
-Résultat : domaines, noms, chemins, expiration et attributs sont enregistrés dans SQLite et JSONL. Les valeurs ne sont pas enregistrées.
+Résultat : les domaines, les noms, les chemins, l'expiration et les attributs sont enregistrés dans SQLite et en JSONL. Les valeurs ne sont pas enregistrées.
 
 ### Valeurs de cookies, uniquement en cas de nécessité absolue
 
@@ -153,7 +153,7 @@ js-listener \
   --secrets /tmp/client-secrets.json
 ```
 
-Résultat : les valeurs sont écrites dans le fichier de secrets. Ce fichier peut contenir des tokens de session et doit rester privé, en `600`, puis être supprimé après analyse.
+Résultat : les valeurs sont écrites dans le fichier de secrets. Ce fichier peut contenir des jetons de session et doit rester privé, en `600`, puis être supprimé après analyse.
 
 ### Combinaison invalide
 
@@ -165,7 +165,7 @@ Résultat attendu : erreur CLI, car `--capture-cookie-values` nécessite `--capt
 
 ## 6. Réponses JS/JSON : combinaisons
 
-### Métadonnées seulement, recommandé
+### Métadonnées seulement (recommandé)
 
 ```bash
 js-listener \
@@ -174,7 +174,7 @@ js-listener \
   --in-scope ./in-scope.txt
 ```
 
-Résultat : URL, statut, MIME, taille et hash selon les ressources observées ; aucun corps de réponse sauvegardé.
+Résultat : URL, statut, type MIME, taille et empreinte selon les ressources observées ; aucun corps de réponse sauvegardé.
 
 ### Sauvegarde limitée des corps
 
@@ -188,9 +188,9 @@ js-listener \
   --max-response-size 1048576
 ```
 
-Résultat : corps JS/JSON de 1 MiB maximum sauvegardés dans le dossier indiqué, avec nom basé sur SHA-256. Les réponses plus grandes ne sont pas sauvegardées.
+Résultat : les corps JS/JSON de 1 MiB au maximum sont sauvegardés dans le dossier indiqué, avec un nom basé sur SHA-256. Les réponses plus volumineuses ne sont pas sauvegardées.
 
-`--capture-response-bodies` peut exposer des données personnelles, des tokens et du contenu métier.
+`--capture-response-bodies` peut exposer des données personnelles, des jetons et du contenu métier.
 
 Combinaison invalide :
 
@@ -202,7 +202,7 @@ Résultat attendu : erreur CLI, car la taille maximale doit être positive.
 
 ## 7. TLS et sandbox Chromium
 
-### Configuration sécuritaire par défaut
+### Configuration sécurisée par défaut
 
 ```bash
 js-listener \
@@ -211,9 +211,9 @@ js-listener \
   --no-ignore-https-errors
 ```
 
-Résultat : validation des certificats TLS active. Cette option est implicite par défaut.
+Résultat : la validation des certificats TLS est active. Cette option est implicite par défaut.
 
-### Exception TLS, environnement contrôlé uniquement
+### Exception TLS (environnement contrôlé uniquement)
 
 ```bash
 js-listener \
@@ -224,7 +224,7 @@ js-listener \
 
 Résultat : les erreurs de certificat sont ignorées. Risque d'interception ou de mauvaise configuration TLS non détectée.
 
-### Sandbox actif, recommandé
+### Sandbox actif (recommandé)
 
 ```bash
 js-listener -t https://example.com --in-scope ./in-scope.txt
@@ -232,7 +232,7 @@ js-listener -t https://example.com --in-scope ./in-scope.txt
 
 Le sandbox Chromium est actif par défaut.
 
-### Désactiver le sandbox, exception seulement
+### Désactiver le sandbox (exception uniquement)
 
 ```bash
 js-listener \
@@ -241,7 +241,7 @@ js-listener \
   --no-sandbox
 ```
 
-Résultat : Chromium est lancé sans sandbox. Réserver à une machine ou un conteneur dédié, avec un compte sans privilèges.
+Résultat : Chromium est lancé sans sandbox. Réserver cette option à une machine ou à un conteneur dédié, avec un compte sans privilèges.
 
 Combinaison invalide :
 
@@ -309,8 +309,8 @@ pgrep -af '[J]S_listener.py'
 |---|---|---|
 | Basculer le mode | `kill -USR1 <PID>` | `ctv <-> ctg`, enregistré dans SQLite. |
 | Arrêt propre | `kill -TERM <PID>` | Ferme Chromium et finalise la session avec `status=stopped`. |
-| Arrêt d'urgence | `kill -USR2 <PID>` | Arrête avec `status=emergency`; limite les opérations de fin. |
-| Arrêt terminal | `Ctrl+C` | Finalise avec `keyboard_interrupt`. |
+| Arrêt d'urgence | `kill -USR2 <PID>` | Arrête avec `status=emergency` ; limite les opérations de fin. |
+| Arrêt depuis le terminal | `Ctrl+C` | Finalise avec `keyboard_interrupt`. |
 
 ## 10. Scanner avant publication
 
@@ -329,7 +329,7 @@ jslistener-secret-scan \
   --output /tmp/js_listener-secret-report.json
 ```
 
-Résultat : rapport JSON contenant les findings, leur sévérité et leur emplacement. Le rapport peut lui-même contenir des chemins sensibles : le conserver hors du dépôt.
+Résultat : rapport JSON contenant les résultats, leur sévérité et leur emplacement. Le rapport peut lui-même contenir des chemins sensibles : le conserver hors du dépôt.
 
 Le scanner est heuristique et ne remplace pas une revue manuelle.
 
@@ -348,7 +348,7 @@ Test depuis n'importe quel répertoire :
 jslistener-test
 ```
 
-Résultat attendu : démarrage du navigateur, deux transitions `ctv -> ctg -> ctv`, création SQLite, puis arrêt propre.
+Résultat attendu : démarrage du navigateur, deux transitions `ctv -> ctg -> ctv`, création de la base SQLite, puis arrêt propre.
 
 ## 12. Matrice de choix rapide
 
@@ -357,10 +357,10 @@ Résultat attendu : démarrage du navigateur, deux transitions `ctv -> ctg -> ct
 | Observation réseau minimale | `--mode ctv` + `--in-scope` | Requêtes `fetch`/`XHR`, sans cookies ni corps. |
 | Cartographie JS/JSON | `--mode ctg` + `--in-scope` | Ressources et dépendances, sans corps sauvegardé. |
 | Analyse de cookies non secrets | `--capture-cookies` | Métadonnées seulement. |
-| Analyse d'un token précis | `--capture-cookies --capture-cookie-values --secrets ...` | Valeurs capturées ; risque élevé, usage temporaire. |
-| Analyse de contenu de réponse | `--capture-response-bodies --max-response-size ...` | Corps limités ; risque de données sensibles. |
+| Analyse d'un jeton précis | `--capture-cookies --capture-cookie-values --secrets ...` | Valeurs capturées ; risque élevé, usage temporaire. |
+| Analyse du contenu des réponses | `--capture-response-bodies --max-response-size ...` | Corps limités ; risque de données sensibles. |
 | Environnement avec certificat de test | `--ignore-https-errors` | TLS permissif ; ne pas utiliser en production. |
-| Exécution isolée | `--headless` dans une machine dédiée | Pas de fenêtre ; supervision nécessaire. |
+| Exécution isolée | `--headless` sur une machine dédiée | Pas de fenêtre ; supervision nécessaire. |
 
 ## 13. Fichiers produits
 
