@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+
+# JS Listener data and reports
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.json
+*.jsonl
+secrets.json
+**/secrets.json
+
+# Captured response bodies and local output
+js_listener_responses/
+response_bodies/
+**/response_bodies/
+reports/
+*.report.json
+
+# Local scope files may contain client domains or sensitive targets
+in-scope.txt
+scope.txt
+*.scope
+
+# Local logs and test artifacts
+*.log
+/tmp/
