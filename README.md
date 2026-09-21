@@ -32,8 +32,41 @@ Playwright et son navigateur Chromium doivent être disponibles dans cet environ
 - `JSlistenerDB_reader.py` : lecture et synthèse d'une base SQLite.
 - `secret_scan.py` : recherche heuristique de secrets et d'artefacts sensibles.
 - `SECURITY.md` : politique de sécurité, risques et protections.
+- `install_cli.sh` : installe les commandes globales dans `~/.local/bin`.
 - `test_js_listener.sh` : test d'intégration local.
 - `.venv/` : environnement Python utilisé pour exécuter Playwright.
+
+## 3.1 Commandes globales
+
+Les commandes suivantes peuvent être installées dans `~/.local/bin`, qui doit être présent dans le `PATH` :
+
+| Commande | Fonction |
+|---|---|
+| `js-listener` | Lance `JS_listener.py`. |
+| `jslistener-db-reader` | Lance `JSlistenerDB_reader.py`. |
+| `jslistener-secret-scan` | Lance `secret_scan.py`. |
+| `jslistener-test` | Lance le test d'intégration avec le `.venv`. |
+
+Après avoir créé l'environnement `.venv` et installé Playwright :
+
+```bash
+./install_cli.sh
+```
+
+Elles peuvent être utilisées depuis n'importe quel répertoire :
+
+```bash
+js-listener --help
+jslistener-db-reader --db /tmp/js_listener.sqlite3
+jslistener-secret-scan --history --output /tmp/js_listener_secret_scan.json
+jslistener-test
+```
+
+Pour une nouvelle machine, créer des lanceurs dans `~/.local/bin` qui pointent vers l'interpréteur `.venv/bin/python` et les fichiers du dépôt. Vérifier ensuite :
+
+```bash
+command -v js-listener jslistener-db-reader jslistener-secret-scan jslistener-test
+```
 
 ## 4. Modes de fonctionnement
 
