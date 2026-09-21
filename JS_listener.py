@@ -132,6 +132,17 @@ def ensure_parent(path):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
 
 
+def secure_file(path):
+    if os.path.exists(path):
+        os.chmod(path, 0o600)
+
+
+def secure_database_files(path):
+    secure_file(path)
+    secure_file(f"{path}-wal")
+    secure_file(f"{path}-shm")
+
+
 def is_js_url(url):
     return urlparse(url or "").path.lower().endswith((".js", ".mjs"))
 
@@ -201,8 +212,10 @@ def url_in_scope(url, patterns):
 
 def connect_db(path):
     ensure_parent(path)
+    secure_database_files(path)
 
     conn = sqlite3.connect(path)
+    secure_database_files(path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
@@ -346,6 +359,7 @@ def connect_db(path):
     )
 
     conn.commit()
+    secure_database_files(path)
     return conn
 
 
@@ -938,6 +952,25 @@ def main():
     parser.add_argument("--cookie-log", default=DEFAULT_COOKIE_LOG)
     parser.add_argument("--js-log", default=DEFAULT_JS_LOG)
     parser.add_argument("--headless", action="store_true")
+    tls_group = parser.add_mutually_exclusive_group()
+    tls_group.add_argument(
+        "--ignore-https-errors",
+        dest="ignore_https_errors",
+        action="store_true",
+        help="désactive la vérification TLS; à utiliser uniquement si nécessaire",
+    )
+    tls_group.add_argument(
+        "--no-ignore-https-errors",
+        dest="ignore_https_errors",
+        action="store_false",
+        help="force la vérification TLS",
+    )
+    parser.set_defaults(ignore_https_errors=False)
+    parser.add_argument(
+        "--no-sandbox",
+        action="store_true",
+        help="désactive le sandbox Chromium; déconseillé hors environnement dédié",
+    )
     parser.add_argument("--capture-response-bodies", action="store_true")
     parser.add_argument(
         "--response-dir",
@@ -957,6 +990,7 @@ def main():
     if args.max_response_size <= 0:
         parser.error("--max-response-size doit être positif")
 
+    os.umask(0o077)
     scope = load_scope_file(args.in_scope)
     conn = connect_db(args.db)
     session_id = f"session_{int(time.time() * 1000)}"
@@ -1050,15 +1084,14 @@ def main():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(
                 headless=args.headless,
-                args=[
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--start-maximized",
-                ],
+                args=(
+                    (["--no-sandbox"] if args.no_sandbox else [])
+                    + ["--disable-dev-shm-usage", "--start-maximized"]
+                ),
             )
 
             context = browser.new_context(
-                ignore_https_errors=True,
+                ignore_https_errors=args.ignore_https_errors,
                 user_agent=args.user_agent,
                 no_viewport=True,
             )
@@ -1437,6 +1470,7 @@ def main():
             ),
         )
         conn.commit()
+        secure_database_files(args.db)
 
         report = export_session(conn, session_id)
 

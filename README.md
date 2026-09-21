@@ -30,6 +30,8 @@ Playwright et son navigateur Chromium doivent être disponibles dans cet environ
 
 - `JS_listener.py` : programme principal.
 - `JSlistenerDB_reader.py` : lecture et synthèse d'une base SQLite.
+- `secret_scan.py` : recherche heuristique de secrets et d'artefacts sensibles.
+- `SECURITY.md` : politique de sécurité, risques et protections.
 - `test_js_listener.sh` : test d'intégration local.
 - `.venv/` : environnement Python utilisé pour exécuter Playwright.
 
@@ -120,6 +122,9 @@ Le navigateur est visible par défaut afin de permettre une navigation manuelle.
 | `--sleep` | Intervalle de surveillance en secondes. |
 | `--inactivity` | Arrêt automatique après une période d'inactivité. `0` désactive cette limite. |
 | `--headless` | Lance le navigateur sans interface graphique. |
+| `--ignore-https-errors` | Désactive explicitement la vérification TLS. Déconseillé ; désactivé par défaut. |
+| `--no-ignore-https-errors` | Force la vérification TLS. C'est le comportement par défaut. |
+| `--no-sandbox` | Désactive le sandbox Chromium. Déconseillé ; le sandbox reste actif par défaut. |
 | `--clear-cookies` | Supprime les cookies du contexte avant la navigation. |
 | `--capture-cookies` | Enregistre les métadonnées des cookies dans SQLite et JSONL. |
 | `--capture-cookie-values` | Enregistre aussi les valeurs dans le fichier de secrets. Nécessite `--capture-cookies`. |
@@ -191,6 +196,8 @@ Les fichiers par défaut sont créés dans `/tmp` :
 
 Les chemins peuvent être modifiés avec les options correspondantes.
 
+La base SQLite et ses fichiers auxiliaires sont forcés en permissions `600`. Les journaux et fichiers de secrets produits par le listener utilisent également des permissions restrictives. Ces protections ne chiffrent pas les données : l'accès au compte système ou aux sauvegardes peut toujours exposer leur contenu.
+
 ### Rapport JSON
 
 Pour produire un rapport complet :
@@ -249,6 +256,8 @@ Pour collecter aussi leurs valeurs :
 
 Les valeurs de cookies peuvent donner accès à une session. Protéger le fichier de secrets, ne pas le partager et le supprimer dès qu'il n'est plus nécessaire.
 
+`--capture-cookie-values` est désactivé par défaut et doit rester désactivé sauf nécessité absolue. Préférer `--capture-cookies` si seules les métadonnées sont nécessaires.
+
 ## 13. Sauvegarder les corps JS/JSON
 
 ```bash
@@ -263,7 +272,35 @@ Les valeurs de cookies peuvent donner accès à une session. Protéger le fichie
 
 Les fichiers sont nommés à partir de leur empreinte SHA-256. Les réponses dépassant la taille maximale ne sont pas sauvegardées.
 
-## 14. Test d'intégration
+Les corps de réponses peuvent contenir des données personnelles, des tokens ou des informations métier. Cette option doit rester désactivée sauf besoin documenté, avec une taille maximale limitée et un dossier de sortie privé.
+
+## 14. Risques d'exécution et options sûres
+
+JSL est un outil d'observation : même sans modification volontaire de la cible, les URLs, requêtes, ressources, cookies et réponses observées peuvent contenir des informations confidentielles.
+
+- Utiliser uniquement une cible et un fichier `--in-scope` explicitement autorisés.
+- Garder `--capture-cookie-values` désactivé par défaut.
+- Garder `--capture-response-bodies` désactivé par défaut.
+- Garder `--ignore-https-errors` désactivé. Le comportement normal vérifie les certificats TLS.
+- Utiliser `--headless` et `--no-sandbox` uniquement dans un environnement dédié et sans privilèges.
+- Stocker la base, les logs et les rapports dans un dossier privé, puis les supprimer après analyse.
+- Ne jamais déposer une base, un secret, un rapport client ou un fichier de périmètre dans Git.
+
+Les protections détaillées, les options à risque et la clause de non-responsabilité sont dans [SECURITY.md](SECURITY.md).
+
+## 15. Scanner avant publication
+
+Avant chaque commit ou publication, lancer le scanner sans publier son rapport :
+
+```bash
+.venv/bin/python secret_scan.py \
+  --history \
+  --output /tmp/js_listener_secret_scan.json
+```
+
+Le scanner examine l'arbre local, les artefacts sensibles connus et, avec `--history`, les commits Git accessibles. Il masque les valeurs et produit un rapport d'exposition JSON. Un rapport sans finding ne prouve pas l'absence de données sensibles : une revue manuelle reste obligatoire.
+
+## 16. Test d'intégration
 
 Le test vérifie le démarrage du navigateur, les signaux `SIGUSR1`, la création SQLite et l'arrêt propre :
 
@@ -273,7 +310,7 @@ PYTHON="$PWD/.venv/bin/python" ./test_js_listener.sh
 
 Le test utilise `https://example.com`. Il peut donc produire zéro ressource et zéro événement réseau, ce qui reste valide pour vérifier le cycle de vie et les changements de mode.
 
-## 15. Dépannage
+## 17. Dépannage
 
 ### Le programme s'arrête immédiatement
 
