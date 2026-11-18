@@ -154,7 +154,7 @@ Exemple `in-scope.txt` :
 ```text
 example.com
 *.example.com
-re:.*\\.example\\.com
+re:.*\.example\.com
 ```
 
 Le filtrage porte principalement sur le nom d'hôte. Sans fichier de périmètre ou sans motif correspondant, les événements ne sont pas enregistrés.
@@ -425,3 +425,7 @@ kill -TERM <PID>
 ```
 
 Utiliser `SIGUSR2` uniquement pour un arrêt d'urgence.
+
+## 18. Licence
+
+JSL est distribué sous licence MIT. Voir [LICENSE](LICENSE).

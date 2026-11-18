@@ -2,7 +2,7 @@
 
 Date : 2026-09-21
 Projet : JSL (JS Listener)
-Chemin du dépôt : /home/riftx56/Documents/Scripts/Upload/JSL
+Chemin du dépôt : racine du dépôt JSL
 
 ---
 

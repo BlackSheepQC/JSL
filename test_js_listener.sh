@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# filepath: /home/riftx56/Documents/Scripts/Upload/JSL/test_js_listener.sh
 
 set -u
 
